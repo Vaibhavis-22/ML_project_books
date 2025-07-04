@@ -1,0 +1,6 @@
+- Spark UDF
+- USer defined functions: you need to register the defined functions to the spark driver so it can send the functions to the executors when needed.
+
+- Enumerate (Batches): Send the batch number, as well as actual batch to have the correct ordering. helps in partition organizing as well.
+
+
