@@ -38,10 +38,24 @@ changing the review parameters to get a better distribution.
 +---------+-------+
 OVERALL CAUSING LOT OF ERRORS - gave Java OutOfMemory Error as well due to heavy df processing
 ===========================================================================
-dt- 26 june 
+dt- 26/6 
 ## Changing the approach to using batches for the processing
 - Created batches for the processing
 - looping through batches, with given functions to get the processed dataframe
+
+
+=================================================================
+4/7
+Uploaded to git, without the data and output folder as it wasunable to upload the large data :
+google drive link for data :
+https://drive.google.com/drive/folders/1ANAFc6E-VUXL9iCulXyu3mw1mwTgTRBH
+=====================================================================
+7/7
+cleaned the data for the models, would proceed for modle training next. the updated outputs are added into google drive 
+
+drive link : https://drive.google.com/drive/folders/1X73GfJtZFAnEjPLUa-gAlEZ4Zp9i5w6u
+
+- cleaned both the datasets for 2 models - als + content base - we will be making a hybrid model for the recommendation.
 
 
 
