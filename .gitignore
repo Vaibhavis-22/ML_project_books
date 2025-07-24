@@ -1,2 +1,4 @@
 data/
 preprocessing/output/
+/book_recommender/data
+/book_recommender/model/data
