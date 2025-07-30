@@ -3,8 +3,7 @@ from pyspark.sql import SparkSession
 from pyspark.ml.recommendation import ALS, ALSModel
 from pyspark.ml.feature import StringIndexerModel
 
-
-
+from rapidfuzz import process
 
 # Initialize Spark
 @st.cache_resource
@@ -24,15 +23,38 @@ def load_data():
 
 books_df, final_features_df, als_model = load_data()
 
+from pyspark.sql.functions import col
+
+def get_content_vector(title, features_df):
+    result = features_df.filter(col("title") == title).select("final_features").collect()
+    return result[0]['final_features'] if result else None
+
 
 from als_model import get_als_recommendations
 from content_model import get_content_recommendations
 from hybrid_model import merge_hybrid_recommendations
 
+# Sample: list of titles from your metadata DataFrame
+all_titles = books_df.select("title").rdd.flatMap(lambda x: x).collect()
+
+def get_best_match(user_input, titles, cutoff=70):
+    match = process.extractOne(user_input, titles, score_cutoff=cutoff)
+    return match[0] if match else None
+
+
 # Streamlit UI
 st.title("📚 Hybrid Book Recommender")
 
 given_book = st.text_input("Enter the book name ")
+# Streamlit input
+
+
+matched_title = get_best_match(given_book, all_titles)
+if matched_title:
+    st.success(f"Using closest match: **{matched_title}**")
+    # Call your content-based recommendation function with matched_title
+else:
+    st.warning("No close match found. Please check the title spelling.")
 user_id = st.text_input("Enter your user id ")
 
 if st.checkbox("Show available user IDs"):
@@ -52,11 +74,11 @@ if st.button("Recommend Books"):
         # Fetch metadata
         als_recs_with_titles = als_recs.join(books_df, als_recs.original_book_id == books_df.Id, "left")
 
-        display_df = als_recs_with_titles.select("Title")
+        display_df = als_recs_with_titles.select("Title").distinct()
         
         titles = display_df.select("Title").rdd.flatMap(lambda x: x).collect()
         st.write("ALS Recommendations:")
-        st.write(als_recs.columns)
+        
 
         for title in titles:
             st.write(f"- {title}")
@@ -66,27 +88,32 @@ if st.button("Recommend Books"):
     else:
         st.warning("No recommendations found for this user.")
 
-    input_vec = final_features_df.filter(final_features_df.Title == given_book).select("final_features").collect()[0]['final_features']
-    st.write(input_vec)
+    
+    try :
 
-    content_recs = get_content_recommendations(final_features_df,input_vec)
-    st.write(content_recs)
-    st.write(als_recs_with_titles)
+        input_vec = final_features_df.filter(final_features_df.Title == matched_title).select("final_features").collect()[0]['final_features']
+    
 
-    # Merge
-    hybrid_recs = merge_hybrid_recommendations(als_recs_with_titles, content_recs)
+        content_recs = get_content_recommendations(final_features_df,input_vec)
+    
+
+        # Merge
+        target_vector = get_content_vector(titles, final_features_df)
+
+        hybrid_recs = merge_hybrid_recommendations(als_recs_with_titles, content_recs)
 
     # Join with book info
     
-    hybrid_titles = hybrid_recs.select("Title").rdd.flatMap(lambda x: x).collect()
-    st.subheader("📌 Hybrid Recommendations")
+        hybrid_titles = hybrid_recs.select("Title").rdd.flatMap(lambda x: x).collect()
+        st.subheader("📌 Hybrid Recommendations")
 
-    st.write(hybrid_titles)
-    st.write(hybrid_recs)
 
-    for title in hybrid_titles:
-        st.write(f"- {title}")
+        for title in hybrid_titles:
+            st.write(f"- {title}")
 
+    except:
+        st.write("--------------------------------")
+ 
 
 
  

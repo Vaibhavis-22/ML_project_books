@@ -12,6 +12,8 @@ def merge_hybrid_recommendations(
     als_scored = als_recs.select("Title", col("rating").alias("als_score"))
     content_scored = content_recs.select("Title", col("similarity").alias("content_score"))
 
+    
+
     # Inner join to ensure both have same book_id
     joined = als_scored.join(content_scored, on="Title", how="inner")
 

@@ -53,7 +53,7 @@ def get_als_recommendations(user_id, spark):
         user_df = spark.createDataFrame([(user_id,)], ["User_id"])
         user_transformed = user_indexer.transform(user_df)
 
-        recs = ALSModel.load("models/als_model").recommendForUserSubset(user_transformed.select("user"), 10)
+        recs = ALSModel.load("models/als_model").recommendForUserSubset(user_transformed.select("user"), 25)
 
         if recs.rdd.isEmpty():
             return None
