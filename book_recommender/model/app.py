@@ -1,24 +1,24 @@
 import streamlit as st
 from pyspark.sql import SparkSession
-from pyspark.ml.recommendation import ALS, ALSModel
-from pyspark.ml.feature import StringIndexerModel
+
 
 from rapidfuzz import process
 
 # Initialize Spark
 @st.cache_resource
 def get_spark():
-    return SparkSession.builder.appName("BookRecs").getOrCreate()
+    return SparkSession.builder.appName("BookRecs").getOrCreate().config("spark.driver.memory","2g").config("spark.executor.memory","2g")
 
 spark = get_spark()
 
 # Load necessary data
 @st.cache_resource
 def load_data():
-    books = spark.read.parquet("/home/vaibhavi/spark-ml-venv/ml_project/book_recommender/data/books_metadata/*", header=True)  # Or wherever your img & meta is
+    books = spark.read.parquet("/home/vaibhavi/spark-ml-venv/ml_project/book_recommender/data/clean_books.parquet", header=True)  # Or wherever your img & meta is
     features = spark.read.parquet("data/vectorized_books.parquet")
-    als_model = ALSModel.load("models/als_model")
-
+    users = spark.read.parquet("/home/vaibhavi/spark-ml-venv/ml_project/book_recommender/model/data/merged_interactions.parquet")
+    users_details = users.select("")
+    
     return books, features, als_model
 
 books_df, final_features_df, als_model = load_data()
@@ -58,8 +58,7 @@ else:
 user_id = st.text_input("Enter your user id ")
 
 if st.checkbox("Show available user IDs"):
-    user_indexer = StringIndexerModel.load("models/user_indexer_fitted")
-    st.write(user_indexer.labels)
+    st.write()
 
 
 if st.button("Recommend Books"):
