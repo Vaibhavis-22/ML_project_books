@@ -1,0 +1,37 @@
+'''
+if st.checkbox("Show available user IDs"):
+    st.write(users_df.select("user_id").distinct().limit(50).toPandas())
+
+if st.button("Recommend Books") and matched_title and user_id is not None:
+    st.subheader("🔍 Generating Recommendations...")
+
+    # ALS Recommendations
+    als_recs = get_als_recommendations(user_id, spark)
+
+    if als_recs is not None and not als_recs.rdd.isEmpty():
+        als_recs_with_titles = als_recs.join(books_df, als_recs.book_id == books_df.id, "left")
+
+        display_df = als_recs_with_titles.select("title").distinct()
+        als_titles = display_df.rdd.flatMap(lambda x: x).collect()
+
+        st.subheader("🔵 ALS Recommendations:")
+        for title in als_titles:
+            st.write(f"- {title}")
+    else:
+        st.warning("No ALS recommendations found for this user.")
+'''
+
+''    # Hybrid Recommendations (if both exist)
+    if als_recs is not None and content_recs is not None:
+        try:
+            hybrid_recs = merge_hybrid_recommendations(als_recs_with_titles, content_recs)
+            hybrid_titles = hybrid_recs.select("title").rdd.flatMap(lambda x: x).collect()
+
+            st.subheader("📌 Hybrid Recommendations:")
+            for title in hybrid_titles:
+                st.write(f"- {title}")
+        except Exception as e:
+            st.error(f"Error merging hybrid recommendations: {e}")'''
+
+#else:
+#    st.info("Please enter both a valid book name and numeric user ID.")
