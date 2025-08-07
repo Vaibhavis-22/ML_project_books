@@ -2,11 +2,6 @@ import streamlit as st
 from pyspark.sql import SparkSession
 from rapidfuzz import process
 from pyspark.sql.functions import col
-import sys
-import os
-
-# Add parent directory to the Python path
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../application/')))
 
 from als_recommendations import get_als_recommendations
 from content_recommendations import get_content_recommendations
